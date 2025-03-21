@@ -4,9 +4,9 @@ import {NavItem} from "@components/nav-item";
 import {MapPin} from "lucide-react";
 
 export const metadata = {
-  title: 'Next.js App Router + NextAuth + Tailwind CSS',
+  title: 'AnimalGuessr',
   description:
-    'A user admin dashboard configured with Next.js, Postgres, NextAuth, Tailwind CSS, TypeScript, and Prettier.'
+    'A simple game to test your knowledge about animals',
 };
 
 export default function RootLayout({children}: { children: React.ReactNode; }) {

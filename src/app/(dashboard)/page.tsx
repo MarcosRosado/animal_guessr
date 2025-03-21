@@ -6,8 +6,6 @@ import {useEffect, useRef, useState} from "react";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import {Button} from "@components/button";
 import Results from "@components/Results";
-import results from "@components/Results";
-import {reset} from "next/dist/lib/picocolors";
 
 const MainPage = () => {
   const [assets, setAssets] = useState<{ image: StaticImport; json: never }[]>([]);
@@ -20,7 +18,7 @@ const MainPage = () => {
 
   useEffect(() => {
     const fetchAssets = async () => {
-      const loadedAssets = await loadAllAssets(10); // Load 10 samples
+      const loadedAssets = await loadAllAssets(1); // Load 10 samples
       setAssets(loadedAssets);
     };
     fetchAssets();

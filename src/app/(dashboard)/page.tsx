@@ -57,10 +57,34 @@ const MainPage = () => {
     }
   }
 
+  const submitHighscore = async (name: string) => {
+    const data = {
+      name:name,
+      totalTime: Date.now() - startTime,
+      scores: scores.map((score, index) => ({ level: `Level ${index + 1}`, score })),
+    };
+
+    await fetch("/api/saveHighscore", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  };
+
+  useEffect(() => {
+    if (currentIndex >= assets.length) {
+      submitHighscore("Anonymous");
+    }
+  }, [currentIndex]);
+
   if (currentIndex >= assets.length) {
     return(
       <>
-        <Results scores={scores} playAgainCallback={resetGame} elapsedTime={Date.now() - startTime}/>
+        <Results
+          scores={scores}
+          playAgainCallback={resetGame}
+          elapsedTime={Date.now() - startTime}
+        />
       </>);
   }
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import {Button} from "@components/button";
+import React, { useState } from 'react';
+import { Button } from "@components/button";
 
 interface ResultsProps {
   scores: number[];
@@ -42,9 +42,8 @@ const Results: React.FC<ResultsProps> = ({ scores, playAgainCallback, elapsedTim
           </ul>
         </div>
       </div>
-      <div>
-        <Button onClick={playAgainCallback}
-                className="flex items-center justify-center bg-blue-500 text-white px-4 py-2 rounded">
+      <div className="flex flex-col items-center">
+        <Button onClick={playAgainCallback} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">
           Jogar novamente
         </Button>
       </div>

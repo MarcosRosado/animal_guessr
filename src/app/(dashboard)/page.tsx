@@ -61,10 +61,11 @@ const MainPage = () => {
     const data = {
       name:name,
       totalTime: Date.now() - startTime,
-      scores: scores.map((score, index) => ({ level: `Level ${index + 1}`, score })),
+      scores: scores.map((score, index) => ({ level: `${assets[index].json["name"]}`, score })),
+      totalScore: scores.reduce((acc, score) => Math.ceil(acc + score), 0),
     };
 
-    await fetch("/api/saveHighscore", {
+    await fetch("/api/save-highscore", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -72,7 +73,7 @@ const MainPage = () => {
   };
 
   useEffect(() => {
-    if (currentIndex >= assets.length) {
+    if (currentIndex >= assets.length && scores.length > 0) {
       submitHighscore("Anonymous");
     }
   }, [currentIndex]);

@@ -1,103 +1,84 @@
 "use client";
 
-import Image from "next/image";
-import React, { useState, useEffect, useRef } from "react";
-import sample1 from "@/assets/images/sample1.jpg";
-import sample1json from "@/assets/dataset/sample1.json";
-import { MapPin } from "lucide-react";
-import { calculateScore } from "@/lib/utils";
-
-interface GridData {
-  name: string;
-  grid: number[][];
-  maxDistance: number;
-  weightsGrid: number[][];
-}
-
-const COLUMNS = 96;
-const ROWS = 54;
+import { GridLoader } from "@components/GridLoader";
+import { loadAllAssets } from "@lib/utils";
+import {useEffect, useRef, useState} from "react";
+import { StaticImport } from "next/dist/shared/lib/get-img-props";
+import {Button} from "@components/button";
 
 const MainPage = () => {
-  const [gridData, setGridData] = useState<GridData>({
-    name: "",
-    grid: [],
-    maxDistance: 0,
-    weightsGrid: [],
-  });
-  const [marker, setMarker] = useState<{ x: number; y: number } | null>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const [imageSize, setImageSize] = useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
+  const [assets, setAssets] = useState<{ image: StaticImport; json: never }[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [scores, setScores] = useState<number[]>([]);
+  const [showGrid, setShowGrid] = useState(false);
+  const [currentScore, setCurrentScore] = useState<number | null>(null);
+  const gridLoaderRef = useRef<{ getScore: () => number | null }>(null);
+
 
   useEffect(() => {
-    setGridData(sample1json);
-    const handleResize = () => {
-      if (imageRef.current) {
-        const { width, height } = imageRef.current.getBoundingClientRect();
-        setImageSize({ width, height });
-      }
+    const fetchAssets = async () => {
+      const loadedAssets = await loadAllAssets(10); // Load 10 samples
+      setAssets(loadedAssets);
     };
-
-    window.addEventListener("resize", handleResize);
-    handleResize();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    fetchAssets();
   }, []);
 
-  const handleGridClick = (row: number, col: number) => {
-    setMarker({ x: col, y: row });
-    const distance = gridData.weightsGrid[row][col];
-    const score = calculateScore(distance, gridData.maxDistance);
-    console.log(`Clicked on row: ${row}, col: ${col}, Distance: ${distance}, Score: ${score}`);
+  const handleConfirm = () => {
+    if (gridLoaderRef.current) {
+      const score = gridLoaderRef.current.getScore();
+      if (score !== null) {
+        setScores([...scores, score]);
+        setCurrentScore(score);
+        setShowGrid(true);
+      }
+    }
   };
 
-  const cellWidth = imageSize.width / COLUMNS;
-  const cellHeight = imageSize.height / ROWS;
+  const handleContinue = () => {
+    if(currentScore == null)
+      return;
+    setShowGrid(false);
+    setCurrentScore(null);
+    setCurrentIndex(currentIndex + 1);
+  };
+
+  if (currentIndex >= assets.length) {
+    const totalScore = scores.reduce((acc, score) => acc + score, 0);
+    return <div>Total Score: {totalScore}</div>;
+  }
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto">
-      <div className="relative">
-        <Image
-          ref={imageRef}
-          src={sample1}
-          alt="Sample"
-          layout="responsive"
-          width={1920}
-          height={1080}
-        />
-        <div
-          className="absolute top-0 left-0 w-full h-full grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${COLUMNS}, ${cellWidth}px)`,
-            gridTemplateRows: `repeat(${ROWS}, ${cellHeight}px)`,
-          }}
-        >
-          {gridData.grid.flatMap((row, rowIndex) =>
-            row.map((cell, colIndex) => (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                className={`border border-transparent${cell === 1 ? " border bg-green-500/50 bg-opacity-20 border-green-500/50" : " bg-transparent"}`}
-                style={{ width: cellWidth, height: cellHeight }}
-                onClick={() => handleGridClick(rowIndex, colIndex)}
-              />
-            ))
-          )}
+    <div>
+      <GridLoader
+        ref={gridLoaderRef}
+        key={currentIndex}
+        gridData={assets[currentIndex].json}
+        image={assets[currentIndex].image}
+        showGrid={showGrid}
+      />
+      <div className="flex items-center justify-center align-middle">
+        {currentScore !== null && (
+          <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+            <h2 className="text-xl font-bold mb-2">Pontuação atual</h2>
+            <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
+          </div>
+        )}
+        <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+          <h2 className="text-xl font-bold mb-2">Imagem</h2>
+          <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
         </div>
-        {marker && (
-          <MapPin
-            size={30}
-            className="absolute text-red-500"
-            style={{
-              left: marker.x * cellWidth + cellWidth / 2,
-              top: marker.y * cellHeight + cellHeight / 2,
-              transform: "translate(-50%, -100%)",
-            }}
-          />
+        <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+          <h2 className="text-xl font-bold mb-2">Pontuação total</h2>
+          <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0) }</p>
+        </div>
+        {currentScore !== null ? (
+          <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
+            Continuar
+          </Button>
+        ) : (
+          <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
+            Confirmar
+          </Button>
         )}
       </div>
     </div>

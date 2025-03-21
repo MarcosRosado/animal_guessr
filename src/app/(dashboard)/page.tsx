@@ -5,6 +5,9 @@ import { loadAllAssets } from "@lib/utils";
 import {useEffect, useRef, useState} from "react";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import {Button} from "@components/button";
+import Results from "@components/Results";
+import results from "@components/Results";
+import {reset} from "next/dist/lib/picocolors";
 
 const MainPage = () => {
   const [assets, setAssets] = useState<{ image: StaticImport; json: never }[]>([]);
@@ -13,7 +16,7 @@ const MainPage = () => {
   const [showGrid, setShowGrid] = useState(false);
   const [currentScore, setCurrentScore] = useState<number | null>(null);
   const gridLoaderRef = useRef<{ getScore: () => number | null }>(null);
-
+  const[startTime, setStartTime] = useState(0);
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -42,9 +45,25 @@ const MainPage = () => {
     setCurrentIndex(currentIndex + 1);
   };
 
+  const resetGame = () => {
+    setScores([]);
+    setCurrentIndex(0);
+    setShowGrid(false);
+    setCurrentScore(null);
+    setStartTime(0);
+  }
+
+  const handleStartTimer = () => {
+    if(startTime === 0) {
+      setStartTime(Date.now());
+    }
+  }
+
   if (currentIndex >= assets.length) {
-    const totalScore = scores.reduce((acc, score) => acc + score, 0);
-    return <div>Total Score: {totalScore}</div>;
+    return(
+      <>
+        <Results scores={scores} playAgainCallback={resetGame} elapsedTime={Date.now() - startTime}/>
+      </>);
   }
 
   return (
@@ -55,6 +74,7 @@ const MainPage = () => {
         gridData={assets[currentIndex].json}
         image={assets[currentIndex].image}
         showGrid={showGrid}
+        startTimerCallback={handleStartTimer}
       />
       <div className="flex items-center justify-center align-middle">
         {currentScore !== null && (

@@ -10,6 +10,7 @@ interface GridLoaderProps {
   gridData: GridData;
   image: StaticImport;
   showGrid?: boolean;
+  startTimerCallback: () => void;
 }
 
 interface GridLoaderRef {
@@ -58,6 +59,7 @@ const GridLoader = forwardRef<GridLoaderRef, GridLoaderProps>((props, ref) => {
   }, []);
 
   const handleGridClick = (row: number, col: number) => {
+    props.startTimerCallback();
     if(props.showGrid)
       return;
     setMarker({ x: col, y: row });

@@ -90,16 +90,18 @@ const MainPage = () => {
   }
 
   return (
-    <div>
-      <GridLoader
-        ref={gridLoaderRef}
-        key={currentIndex}
-        gridData={assets[currentIndex].json}
-        image={assets[currentIndex].image}
-        showGrid={showGrid}
-        startTimerCallback={handleStartTimer}
-      />
-      <div className="flex items-center justify-center align-middle">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-grow">
+        <GridLoader
+          ref={gridLoaderRef}
+          key={currentIndex}
+          gridData={assets[currentIndex].json}
+          image={assets[currentIndex].image}
+          showGrid={showGrid}
+          startTimerCallback={handleStartTimer}
+        />
+      </div>
+      <div className="flex flex-col md:flex-row items-center justify-center p-4">
         {currentScore !== null && (
           <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
             <h2 className="text-xl font-bold mb-2">Pontuação atual</h2>
@@ -108,11 +110,11 @@ const MainPage = () => {
         )}
         <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
           <h2 className="text-xl font-bold mb-2">Imagem</h2>
-          <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
+          <p className="text-lg">{currentIndex + 1} of {assets.length}</p>
         </div>
         <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-          <h2 className="text-xl font-bold mb-2">Pontuação total</h2>
-          <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0) }</p>
+          <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
+          <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
         </div>
         {currentScore !== null ? (
           <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">

@@ -15,8 +15,8 @@ const Results: React.FC<ResultsProps> = ({ scores, playAgainCallback, elapsedTim
   const seconds = Math.floor((elapsedTime % 60000) / 1000);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="flex flex-row items-start justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex flex-col md:flex-row items-start justify-center">
         <div className="flex flex-col">
           <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
             <h2 className="text-xl font-bold mb-2">Tempo gasto</h2>
@@ -42,8 +42,8 @@ const Results: React.FC<ResultsProps> = ({ scores, playAgainCallback, elapsedTim
           </ul>
         </div>
       </div>
-      <div className="flex flex-col items-center">
-        <Button onClick={playAgainCallback} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">
+      <div className="flex flex-col items-center mt-4">
+        <Button onClick={playAgainCallback} className="bg-blue-500 text-white px-4 py-2 rounded">
           Jogar novamente
         </Button>
       </div>

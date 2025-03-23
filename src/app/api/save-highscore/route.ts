@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const { name, totalTime, scores, totalScore }: HighscoreData = body;
 
     // Basic validation
-    if (!name || !totalTime || !Array.isArray(scores)) {
+    if (!name || !totalTime || !Array.isArray(scores) || !totalScore) {
       return new Response("Invalid data format", { status: 400 });
     }
 

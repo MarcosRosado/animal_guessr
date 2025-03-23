@@ -1,238 +1,36 @@
 "use client";
 
-import { GridLoader } from "@components/GridLoader";
-import {loadAllAssets, usePageLoaded} from "@lib/utils";
-import { useEffect, useRef, useState } from "react";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import { Button } from "@components/button";
-import Results from "@components/Results";
-import {clsx} from "clsx";
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@components/button';
 
-const START_TIME = 10;
+const Dashboard = () => {
+  const router = useRouter();
 
-const MainPage = () => {
-  const [assets, setAssets] = useState<{ image: StaticImport; json: never }[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [scores, setScores] = useState<number[]>([]);
-  const [timeSpentOnEachImage, setTimeSpentOnEachImage] = useState<number[]>([]);
-  const [showGrid, setShowGrid] = useState(false);
-  const [currentScore, setCurrentScore] = useState<number | null>(null);
-  const gridLoaderRef = useRef<{ getScore: () => number | null }>(null);
-  const [startTime, setStartTime] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(START_TIME); // 1 minute by default
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
-  const isPageLoaded = usePageLoaded();
-
-  useEffect(() => {
-    const fetchAssets = async () => {
-      const loadedAssets = await loadAllAssets(1); // Load 10 samples
-      setAssets(loadedAssets);
-    };
-    fetchAssets();
-  }, []);
-
-  useEffect(() => {
-    if (isPageLoaded) {
-      startTimer();
-      handleStartTimer();
-    }
-  }, [isPageLoaded]);
-
-  const handleConfirm = () => {
-    if (gridLoaderRef.current) {
-      const score = gridLoaderRef.current.getScore();
-      if (score !== null) {
-        setScores([...scores, score]);
-        setTimeSpentOnEachImage([...timeSpentOnEachImage, START_TIME - timeLeft]);
-        setCurrentScore(score);
-        setShowGrid(true);
-        stopTimer();
-      }
-    }
+  const handleStartGame = () => {
+    router.push('/play');
   };
-
-  const handleContinue = () => {
-    if (currentScore == null) return;
-    setShowGrid(false);
-    setCurrentScore(null);
-    setCurrentIndex(currentIndex + 1);
-    resetTimer();
-  };
-
-  const resetGame = () => {
-    setScores([]);
-    setCurrentIndex(0);
-    setShowGrid(false);
-    setCurrentScore(null);
-    setStartTime(0);
-    resetTimer();
-    startTimer();
-  };
-
-  const handleStartTimer = () => {
-    if (startTime === 0) {
-      setStartTime(Date.now());
-    }
-  };
-
-  const stopTimer = () => {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      setTimerInterval(null);
-    }
-  };
-
-  const startTimer = () => {
-    if (timerInterval) clearInterval(timerInterval);
-    setTimeLeft(START_TIME);
-    const interval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(interval);
-          handleTimeEnd();
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-    setTimerInterval(interval);
-  };
-
-  const resetTimer = () => {
-    if (timerInterval) clearInterval(timerInterval);
-    setTimeLeft(START_TIME);
-  };
-
-  const handleTimeEnd = async () => {
-    setCurrentScore(0);
-    setScores([...scores, 0]);
-    setTimeSpentOnEachImage([...timeSpentOnEachImage, START_TIME - timeLeft]);
-    handleContinue();
-    await submitHighscore("Anonymous");
-  };
-
-  const submitHighscore = async (name: string) => {
-    const data = {
-      name: name,
-      totalTime: Date.now() - startTime,
-      scores: scores.map((score, index) => ({ level: `${assets[index].json["name"]}`, score: score, timeSpentOnImage: timeSpentOnEachImage[index] })),
-      totalScore: scores.reduce((acc, score) => Math.ceil(acc + score), 0),
-    };
-
-    await fetch("/api/save-highscore", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-  };
-
-  useEffect(() => {
-    if (currentIndex >= assets.length && scores.length > 0) {
-      submitHighscore("Anonymous");
-    }
-  }, [currentIndex]);
-
-  if (currentIndex >= assets.length) {
-    return (
-      <>
-        <Results
-          scores={scores}
-          playAgainCallback={resetGame}
-          elapsedTime={Date.now() - startTime}
-        />
-      </>
-    );
-  }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex-grow">
-        <GridLoader
-          ref={gridLoaderRef}
-          key={currentIndex}
-          gridData={assets[currentIndex].json}
-          image={assets[currentIndex].image}
-          showGrid={showGrid}
-          startTimerCallback={handleStartTimer}
-        />
-      </div>
-      <div className="flex flex-col items-center justify-center p-4">
-        {/* Mobile Layout */}
-        <div className="block md:hidden w-full">
-          <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
-            <div
-              className={clsx('h-4 rounded-full', {
-                'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
-                'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
-                'bg-red-500': timeLeft <= START_TIME / 3,
-              })}
-              style={{width: `${(timeLeft / START_TIME) * 100}%`}}
-            ></div>
-          </div>
-          {currentScore !== null && (
-            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-              <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
-              <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
-            </div>
-          )}
-          <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-            <h2 className="text-xl font-bold mb-2">Imagem</h2>
-            <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-            <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
-            <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
-          </div>
-          {currentScore !== null ? (
-            <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
-              Continue
-            </Button>
-          ) : (
-            <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
-              Confirm
-            </Button>
-          )}
-        </div>
-
-        {/* Desktop Layout */}
-        <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
-          <div
-            className={clsx('h-4 rounded-full', {
-              'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
-              'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
-              'bg-red-500': timeLeft <= START_TIME / 3,
-            })}
-            style={{width: `${(timeLeft / START_TIME) * 100}%`}}
-          ></div>
-        </div>
-        <div className="hidden md:flex md:flex-col md:items-center w-full">
-          <div className="flex flex-row flex-wrap justify-center">
-            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-              <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
-              <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
-            </div>
-            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-              <h2 className="text-xl font-bold mb-2">Imagem</h2>
-              <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
-            </div>
-            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-              <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
-              <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
-            </div>
-          </div>
-          {currentScore !== null ? (
-            <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
-              Continuar
-            </Button>
-          ) : (
-            <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
-              Confirmar
-            </Button>
-          )}
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+      <div className="bg-white shadow-md rounded-lg p-6 m-4 w-full md:w-2/3 lg:w-1/2 text-center">
+        <h1 className="text-3xl font-bold mb-4">Regras</h1>
+        <p className="text-lg mb-4">
+          Bem vindo ao <b>Animalguessr</b>, aqui estão as regras:
+        </p>
+        <ul className="list-disc list-inside text-left mb-4">
+          <li>A cada rodada você será apresentado a uma imagem.</li>
+          <li>Sua tarefa é identificar o animal na foto, clicando onde você acredita que ele esteja.</li>
+          <li>Você tem um limite de 10 segundos para completar cada imagem.</li>
+          <li>Uma pontuação sera atribuída dependendo da proximidade do animal, variando de 0 a 1000.</li>
+          <li>Encontre os animais, e tente conquistar a maior pontuação possível!</li>
+        </ul>
+        <Button onClick={handleStartGame} className="bg-blue-500 text-white px-4 py-2 rounded">
+          Iniciar Jogo
+        </Button>
       </div>
     </div>
   );
 };
 
-export default MainPage;
+export default Dashboard;

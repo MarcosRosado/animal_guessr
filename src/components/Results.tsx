@@ -5,9 +5,11 @@ interface ResultsProps {
   scores: number[];
   elapsedTime: number;
   playAgainCallback: () => void;
+  mainMenuCallback: () => void;
 }
 
-const Results: React.FC<ResultsProps> = ({ scores, playAgainCallback, elapsedTime }) => {
+const Results: React.FC<ResultsProps> = ({ scores, playAgainCallback, elapsedTime, mainMenuCallback }) => {
+
   const highScore = Math.max(...scores);
   const totalScore = scores.reduce((acc, score) => acc + score, 0);
 
@@ -45,6 +47,9 @@ const Results: React.FC<ResultsProps> = ({ scores, playAgainCallback, elapsedTim
       <div className="flex flex-col items-center mt-4">
         <Button onClick={playAgainCallback} className="bg-blue-500 text-white px-4 py-2 rounded">
           Jogar novamente
+        </Button>
+        <Button onClick={mainMenuCallback} variant={"outline"} className="px-4 py-2 rounded mt-2">
+          Voltar ao início
         </Button>
       </div>
     </div>

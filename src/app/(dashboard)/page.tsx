@@ -1,20 +1,27 @@
 "use client";
 
 import { GridLoader } from "@components/GridLoader";
-import { loadAllAssets } from "@lib/utils";
-import {useEffect, useRef, useState} from "react";
+import {loadAllAssets, usePageLoaded} from "@lib/utils";
+import { useEffect, useRef, useState } from "react";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import {Button} from "@components/button";
+import { Button } from "@components/button";
 import Results from "@components/Results";
+import {clsx} from "clsx";
+
+const START_TIME = 10;
 
 const MainPage = () => {
   const [assets, setAssets] = useState<{ image: StaticImport; json: never }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
+  const [timeSpentOnEachImage, setTimeSpentOnEachImage] = useState<number[]>([]);
   const [showGrid, setShowGrid] = useState(false);
   const [currentScore, setCurrentScore] = useState<number | null>(null);
   const gridLoaderRef = useRef<{ getScore: () => number | null }>(null);
-  const[startTime, setStartTime] = useState(0);
+  const [startTime, setStartTime] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(START_TIME); // 1 minute by default
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const isPageLoaded = usePageLoaded();
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -24,23 +31,32 @@ const MainPage = () => {
     fetchAssets();
   }, []);
 
+  useEffect(() => {
+    if (isPageLoaded) {
+      startTimer();
+      handleStartTimer();
+    }
+  }, [isPageLoaded]);
+
   const handleConfirm = () => {
     if (gridLoaderRef.current) {
       const score = gridLoaderRef.current.getScore();
       if (score !== null) {
         setScores([...scores, score]);
+        setTimeSpentOnEachImage([...timeSpentOnEachImage, START_TIME - timeLeft]);
         setCurrentScore(score);
         setShowGrid(true);
+        stopTimer();
       }
     }
   };
 
   const handleContinue = () => {
-    if(currentScore == null)
-      return;
+    if (currentScore == null) return;
     setShowGrid(false);
     setCurrentScore(null);
     setCurrentIndex(currentIndex + 1);
+    resetTimer();
   };
 
   const resetGame = () => {
@@ -49,19 +65,57 @@ const MainPage = () => {
     setShowGrid(false);
     setCurrentScore(null);
     setStartTime(0);
-  }
+    resetTimer();
+    startTimer();
+  };
 
   const handleStartTimer = () => {
-    if(startTime === 0) {
+    if (startTime === 0) {
       setStartTime(Date.now());
     }
-  }
+  };
+
+  const stopTimer = () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+  };
+
+  const startTimer = () => {
+    if (timerInterval) clearInterval(timerInterval);
+    setTimeLeft(START_TIME);
+    const interval = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(interval);
+          handleTimeEnd();
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+    setTimerInterval(interval);
+  };
+
+  const resetTimer = () => {
+    if (timerInterval) clearInterval(timerInterval);
+    setTimeLeft(START_TIME);
+  };
+
+  const handleTimeEnd = async () => {
+    setCurrentScore(0);
+    setScores([...scores, 0]);
+    setTimeSpentOnEachImage([...timeSpentOnEachImage, START_TIME - timeLeft]);
+    handleContinue();
+    await submitHighscore("Anonymous");
+  };
 
   const submitHighscore = async (name: string) => {
     const data = {
-      name:name,
+      name: name,
       totalTime: Date.now() - startTime,
-      scores: scores.map((score, index) => ({ level: `${assets[index].json["name"]}`, score })),
+      scores: scores.map((score, index) => ({ level: `${assets[index].json["name"]}`, score: score, timeSpentOnImage: timeSpentOnEachImage[index] })),
       totalScore: scores.reduce((acc, score) => Math.ceil(acc + score), 0),
     };
 
@@ -79,14 +133,15 @@ const MainPage = () => {
   }, [currentIndex]);
 
   if (currentIndex >= assets.length) {
-    return(
+    return (
       <>
         <Results
           scores={scores}
           playAgainCallback={resetGame}
           elapsedTime={Date.now() - startTime}
         />
-      </>);
+      </>
+    );
   }
 
   return (
@@ -101,28 +156,38 @@ const MainPage = () => {
           startTimerCallback={handleStartTimer}
         />
       </div>
-      <div className="flex flex-col md:flex-row items-center justify-center p-4">
+      <div className="flex flex-col items-center justify-center p-4">
+        <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
+          <div
+            className={clsx('h-4 rounded-full', {
+              'bg-green-500': timeLeft > START_TIME - START_TIME/3,
+              'bg-yellow-500': timeLeft <= START_TIME - START_TIME/3 && timeLeft > START_TIME/3,
+              'bg-red-500': timeLeft <= START_TIME/3,
+            }) }
+            style={{ width: `${(timeLeft / START_TIME) * 100}%` }}
+          ></div>
+        </div>
         {currentScore !== null && (
           <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-            <h2 className="text-xl font-bold mb-2">Pontuação atual</h2>
+            <h2 className="text-xl font-bold mb-2">Current Score</h2>
             <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
           </div>
         )}
         <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-          <h2 className="text-xl font-bold mb-2">Imagem</h2>
+          <h2 className="text-xl font-bold mb-2">Image</h2>
           <p className="text-lg">{currentIndex + 1} of {assets.length}</p>
         </div>
         <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-          <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
+          <h2 className="text-xl font-bold mb-2">Total Score</h2>
           <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
         </div>
         {currentScore !== null ? (
           <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
-            Continuar
+            Continue
           </Button>
         ) : (
           <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
-            Confirmar
+            Confirm
           </Button>
         )}
       </div>

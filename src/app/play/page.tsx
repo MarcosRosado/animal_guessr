@@ -176,10 +176,10 @@ const MainPage = () => {
           startTimerCallback={handleStartTimer}
         />
       </div>
-      <div className="flex flex-col items-center justify-center p-4">
+      <div className="flex flex-col items-center justify-center p-4 w-full">
         {/* Mobile Layout */}
-        <div className="block md:hidden w-full">
-          <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
+        <div className="block md:hidden w-full flex flex-col items-center">
+          <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
             <div
               className={clsx('h-4 rounded-full', {
                 'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
@@ -189,6 +189,15 @@ const MainPage = () => {
               style={{width: `${(timeLeft / START_TIME) * 100}%`}}
             ></div>
           </div>
+          {currentScore !== null ? (
+            <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
+              Continuar
+            </Button>
+          ) : (
+            <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
+              Confirmar
+            </Button>
+          )}
           {currentScore !== null && (
             <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
               <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
@@ -203,6 +212,20 @@ const MainPage = () => {
             <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
             <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
           </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:flex md:flex-col md:items-center w-full">
+          <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
+            <div
+              className={clsx('h-4 rounded-full', {
+                'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
+                'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
+                'bg-red-500': timeLeft <= START_TIME / 3,
+              })}
+              style={{width: `${(timeLeft / START_TIME) * 100}%`}}
+            ></div>
+          </div>
           {currentScore !== null ? (
             <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
               Continuar
@@ -212,20 +235,6 @@ const MainPage = () => {
               Confirmar
             </Button>
           )}
-        </div>
-
-        {/* Desktop Layout */}
-        <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
-          <div
-            className={clsx('h-4 rounded-full', {
-              'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
-              'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
-              'bg-red-500': timeLeft <= START_TIME / 3,
-            })}
-            style={{width: `${(timeLeft / START_TIME) * 100}%`}}
-          ></div>
-        </div>
-        <div className="hidden md:flex md:flex-col md:items-center w-full">
           <div className="flex flex-row flex-wrap justify-center">
             <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
               <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
@@ -240,15 +249,6 @@ const MainPage = () => {
               <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
             </div>
           </div>
-          {currentScore !== null ? (
-            <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
-              Continuar
-            </Button>
-          ) : (
-            <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
-              Confirmar
-            </Button>
-          )}
         </div>
       </div>
     </div>

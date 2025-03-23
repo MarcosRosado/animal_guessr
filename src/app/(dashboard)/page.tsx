@@ -157,39 +157,79 @@ const MainPage = () => {
         />
       </div>
       <div className="flex flex-col items-center justify-center p-4">
+        {/* Mobile Layout */}
+        <div className="block md:hidden w-full">
+          <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
+            <div
+              className={clsx('h-4 rounded-full', {
+                'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
+                'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
+                'bg-red-500': timeLeft <= START_TIME / 3,
+              })}
+              style={{width: `${(timeLeft / START_TIME) * 100}%`}}
+            ></div>
+          </div>
+          {currentScore !== null && (
+            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+              <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
+              <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
+            </div>
+          )}
+          <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+            <h2 className="text-xl font-bold mb-2">Imagem</h2>
+            <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+            <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
+            <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
+          </div>
+          {currentScore !== null ? (
+            <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
+              Continue
+            </Button>
+          ) : (
+            <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
+              Confirm
+            </Button>
+          )}
+        </div>
+
+        {/* Desktop Layout */}
         <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
           <div
             className={clsx('h-4 rounded-full', {
-              'bg-green-500': timeLeft > START_TIME - START_TIME/3,
-              'bg-yellow-500': timeLeft <= START_TIME - START_TIME/3 && timeLeft > START_TIME/3,
-              'bg-red-500': timeLeft <= START_TIME/3,
-            }) }
-            style={{ width: `${(timeLeft / START_TIME) * 100}%` }}
+              'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
+              'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
+              'bg-red-500': timeLeft <= START_TIME / 3,
+            })}
+            style={{width: `${(timeLeft / START_TIME) * 100}%`}}
           ></div>
         </div>
-        {currentScore !== null && (
-          <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-            <h2 className="text-xl font-bold mb-2">Current Score</h2>
-            <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
+        <div className="hidden md:flex md:flex-col md:items-center w-full">
+          <div className="flex flex-row flex-wrap justify-center">
+            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+              <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
+              <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
+            </div>
+            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+              <h2 className="text-xl font-bold mb-2">Imagem</h2>
+              <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
+            </div>
+            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+              <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
+              <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
+            </div>
           </div>
-        )}
-        <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-          <h2 className="text-xl font-bold mb-2">Image</h2>
-          <p className="text-lg">{currentIndex + 1} of {assets.length}</p>
+          {currentScore !== null ? (
+            <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
+              Continuar
+            </Button>
+          ) : (
+            <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
+              Confirmar
+            </Button>
+          )}
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-          <h2 className="text-xl font-bold mb-2">Total Score</h2>
-          <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
-        </div>
-        {currentScore !== null ? (
-          <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
-            Continue
-          </Button>
-        ) : (
-          <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
-            Confirm
-          </Button>
-        )}
       </div>
     </div>
   );

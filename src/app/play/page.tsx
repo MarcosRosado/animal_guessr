@@ -9,7 +9,7 @@ import Results from "@components/Results";
 import {clsx} from "clsx";
 import {useRouter} from "next/navigation";
 
-const START_TIME = 30;
+const START_TIME = 10;
 const NUM_SAMPLES = 10;
 
 const MainPage = () => {
@@ -17,6 +17,7 @@ const MainPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
   const [timeSpentOnEachImage, setTimeSpentOnEachImage] = useState<number[]>([]);
+  const [finishTimestampOnEachImage, setFinishTimestampOnEachImage] = useState<number[]>([]);
   const [showGrid, setShowGrid] = useState(false);
   const [currentScore, setCurrentScore] = useState<number | null>(null);
   const gridLoaderRef = useRef<{ getScore: () => number | null }>(null);
@@ -44,16 +45,18 @@ const MainPage = () => {
   useEffect(() => {
     if (isPageLoaded) {
       startTimer();
-      handleStartTimer();
     }
   }, [isPageLoaded]);
 
-  const handleConfirm = () => {
+  const handleConfirm = (skipCoreVerification?: boolean) => {
     if (gridLoaderRef.current) {
-      const score = gridLoaderRef.current.getScore();
-      if (score !== null) {
+      let score = gridLoaderRef.current.getScore();
+      if(skipCoreVerification === true) score = 0;
+      const willSkip = skipCoreVerification || score !== null;
+      if (score !== null && willSkip) {
         setScores([...scores, score]);
         setTimeSpentOnEachImage([...timeSpentOnEachImage, START_TIME - timeLeft]);
+        setFinishTimestampOnEachImage([...finishTimestampOnEachImage, Date.now()]);
         setCurrentScore(score);
         setShowGrid(true);
         stopTimer();
@@ -78,6 +81,7 @@ const MainPage = () => {
     setShowGrid(false);
     setCurrentScore(null);
     setTimeSpentOnEachImage([]);
+    setFinishTimestampOnEachImage([]);
     resetTimer();
     startTimer();
   };
@@ -85,10 +89,6 @@ const MainPage = () => {
   const handleMainMenu = () => {
     router.push("/");
   }
-
-  const handleStartTimer = () => {
-      setCanSetMarker(true);
-  };
 
   const stopTimer = () => {
     if (timerInterval) {
@@ -98,6 +98,7 @@ const MainPage = () => {
   };
 
   const startTimer = () => {
+    setCanSetMarker(true);
     if (timerInterval) clearInterval(timerInterval);
     setTimeLeft(START_TIME);
     const interval = setInterval(() => {
@@ -122,7 +123,8 @@ const MainPage = () => {
     setCanSetMarker(false);
     stopTimer();
     setCurrentScore(0);
-    handleContinue();
+    setShowGrid(true);
+    handleConfirm(true);
   };
 
   const submitHighscore = async (name: string) => {
@@ -134,6 +136,7 @@ const MainPage = () => {
         level: `${assets[index].json["name"]}`,
         score: score,
         timeSpentOnImage: timeSpentOnEachImage[index],
+        finishTimestamp: finishTimestampOnEachImage[index],
       })),
       totalScore: currentScores.reduce((acc, score) => Math.ceil(acc + score), 0),
     };
@@ -165,8 +168,8 @@ const MainPage = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex-grow">
+    <div className="flex flex-col min-h-screen bg-black">
+      <div className="flex flex-col items-center justify-center w-full h-full mb-8">
         <GridLoader
           canSetMarker={canSetMarker}
           ref={gridLoaderRef}
@@ -174,11 +177,9 @@ const MainPage = () => {
           gridData={assets[currentIndex].json}
           image={assets[currentIndex].image}
           showGrid={showGrid}
-          startTimerCallback={handleStartTimer}
-
         />
       </div>
-      <div className="flex flex-col items-center justify-center p-4 w-full">
+      <div className="flex flex-col items-center justify-center p-4 w-4/5 mx-auto">
         {/* Mobile Layout */}
         <div className="block md:hidden w-full flex flex-col items-center">
           <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
@@ -196,7 +197,7 @@ const MainPage = () => {
               Continuar
             </Button>
           ) : (
-            <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
+            <Button onClick={() => handleConfirm()} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
               Confirmar
             </Button>
           )}
@@ -233,7 +234,7 @@ const MainPage = () => {
               Continuar
             </Button>
           ) : (
-            <Button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
+            <Button onClick={() =>handleConfirm()} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
               Confirmar
             </Button>
           )}

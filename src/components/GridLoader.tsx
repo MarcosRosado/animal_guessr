@@ -10,7 +10,6 @@ interface GridLoaderProps {
   gridData: GridData;
   image: StaticImport;
   showGrid?: boolean;
-  startTimerCallback: () => void;
   canSetMarker: boolean;
 }
 
@@ -60,7 +59,6 @@ const GridLoader = forwardRef<GridLoaderRef, GridLoaderProps>((props, ref) => {
   }, []);
 
   const handleGridClick = (row: number, col: number) => {
-    props.startTimerCallback();
     if(props.showGrid || !props.canSetMarker)
       return;
     setMarker({ x: col, y: row });
@@ -83,8 +81,8 @@ const GridLoader = forwardRef<GridLoaderRef, GridLoaderProps>((props, ref) => {
   }));
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto">
-      <div className="relative">
+    <div className="relative w-full max-w-4xl mx-auto">
+      <div className="relative mt-8">
         <Image
           ref={imageRef}
           src={props.image}
@@ -120,6 +118,7 @@ const GridLoader = forwardRef<GridLoaderRef, GridLoaderProps>((props, ref) => {
               left: marker.x * cellWidth + cellWidth / 2,
               top: marker.y * cellHeight + cellHeight / 2,
               transform: "translate(-50%, -100%)",
+              fill: "currentColor",
             }}
           />
         )}

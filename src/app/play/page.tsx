@@ -119,12 +119,9 @@ const MainPage = () => {
   };
 
   const handleTimeEnd = async () => {
-    const scoresCopy = [...scores];
     setCanSetMarker(false);
     stopTimer();
     setCurrentScore(0);
-    setScores([...scoresCopy, 0]);
-    setTimeSpentOnEachImage([...timeSpentOnEachImage, START_TIME - timeLeft]);
     handleContinue();
   };
 

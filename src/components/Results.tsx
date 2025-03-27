@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button } from "@components/button";
+import React from 'react';
+import {Button} from "@components/button";
 
 interface ResultsProps {
   scores: number[];
@@ -13,8 +13,7 @@ const Results: React.FC<ResultsProps> = ({ scores, playAgainCallback, elapsedTim
   const highScore = Math.max(...scores);
   const totalScore = scores.reduce((acc, score) => acc + score, 0);
 
-  const minutes = Math.floor(elapsedTime / 60000);
-  const seconds = Math.floor((elapsedTime % 60000) / 1000);
+  const minutes = Math.floor(elapsedTime / 60);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -22,7 +21,7 @@ const Results: React.FC<ResultsProps> = ({ scores, playAgainCallback, elapsedTim
         <div className="flex flex-col">
           <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
             <h2 className="text-xl font-bold mb-2">Tempo gasto</h2>
-            <p className="text-2xl text-blue-500">{minutes} minuto(s) e {seconds} segundo(s)</p>
+            <p className="text-2xl text-blue-500">{minutes} minuto(s) e {elapsedTime} segundo(s)</p>
           </div>
           <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
             <h2 className="text-xl font-bold mb-2">Pontuação total</h2>

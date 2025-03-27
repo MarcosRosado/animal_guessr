@@ -9,7 +9,8 @@ import Results from "@components/Results";
 import {clsx} from "clsx";
 import {useRouter} from "next/navigation";
 
-const START_TIME = 10;
+const START_TIME = 30;
+const NUM_SAMPLES = 10;
 
 const MainPage = () => {
   const [assets, setAssets] = useState<{ image: StaticImport; json: never }[]>([]);
@@ -19,15 +20,16 @@ const MainPage = () => {
   const [showGrid, setShowGrid] = useState(false);
   const [currentScore, setCurrentScore] = useState<number | null>(null);
   const gridLoaderRef = useRef<{ getScore: () => number | null }>(null);
-  const [startTime, setStartTime] = useState(0);
   const [timeLeft, setTimeLeft] = useState(START_TIME); // 1 minute by default
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [canSetMarker, setCanSetMarker] = useState(true);
   const isPageLoaded = usePageLoaded();
   const router = useRouter();
 
+
   useEffect(() => {
     const fetchAssets = async () => {
-      const loadedAssets = await loadAllAssets(1); // Load 10 samples
+      const loadedAssets = await loadAllAssets(NUM_SAMPLES); // Load 10 samples
       setAssets(loadedAssets);
     };
     fetchAssets();
@@ -65,6 +67,9 @@ const MainPage = () => {
     setCurrentScore(null);
     setCurrentIndex(currentIndex + 1);
     resetTimer();
+    if(currentIndex >= assets.length) {
+      stopTimer();
+    }
   };
 
   const resetGame = () => {
@@ -72,7 +77,6 @@ const MainPage = () => {
     setCurrentIndex(0);
     setShowGrid(false);
     setCurrentScore(null);
-    setStartTime(0);
     setTimeSpentOnEachImage([]);
     resetTimer();
     startTimer();
@@ -83,9 +87,7 @@ const MainPage = () => {
   }
 
   const handleStartTimer = () => {
-    if (startTime === 0) {
-      setStartTime(Date.now());
-    }
+      setCanSetMarker(true);
   };
 
   const stopTimer = () => {
@@ -113,23 +115,24 @@ const MainPage = () => {
   const resetTimer = () => {
     if (timerInterval) clearInterval(timerInterval);
     setTimeLeft(START_TIME);
+    startTimer();
   };
 
   const handleTimeEnd = async () => {
     const scoresCopy = [...scores];
+    setCanSetMarker(false);
     stopTimer();
     setCurrentScore(0);
     setScores([...scoresCopy, 0]);
     setTimeSpentOnEachImage([...timeSpentOnEachImage, START_TIME - timeLeft]);
     handleContinue();
-    await submitHighscore("Anonymous");
   };
 
   const submitHighscore = async (name: string) => {
     const currentScores = [...scores];
     const data = {
       name: name,
-      totalTime: Date.now() - startTime,
+      totalTime: timeSpentOnEachImage.reduce((acc, time) => acc + time, 0),
       scores: currentScores.map((score, index) => ({
         level: `${assets[index].json["name"]}`,
         score: score,
@@ -157,7 +160,7 @@ const MainPage = () => {
         <Results
           scores={scores}
           playAgainCallback={resetGame}
-          elapsedTime={Date.now() - startTime}
+          elapsedTime={timeSpentOnEachImage.reduce((acc, time) => acc + time, 0)}
           mainMenuCallback={handleMainMenu}
         />
       </>
@@ -168,12 +171,14 @@ const MainPage = () => {
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow">
         <GridLoader
+          canSetMarker={canSetMarker}
           ref={gridLoaderRef}
           key={currentIndex}
           gridData={assets[currentIndex].json}
           image={assets[currentIndex].image}
           showGrid={showGrid}
           startTimerCallback={handleStartTimer}
+
         />
       </div>
       <div className="flex flex-col items-center justify-center p-4 w-full">

@@ -21,7 +21,7 @@ const Dashboard = () => {
         <ul className="list-disc list-inside text-left mb-4">
           <li>A cada rodada você será apresentado a uma imagem.</li>
           <li>Sua tarefa é identificar o animal na foto, clicando onde você acredita que ele esteja.</li>
-          <li>Você tem um limite de 10 segundos para completar cada imagem.</li>
+          <li>Você tem um limite de 30 segundos para completar cada imagem.</li>
           <li>Uma pontuação sera atribuída dependendo da proximidade do animal, variando de 0 a 1000.</li>
           <li>Encontre os animais, e tente conquistar a maior pontuação possível!</li>
         </ul>

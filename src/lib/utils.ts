@@ -13,7 +13,7 @@ export function calculateScore (distance: number, maxDistance: number): number {
 }
 
 export async function importAssets (sampleNumber: number): Promise<{ image: StaticImport; json: never }> {
-  const image = await import(`@assets/images/sample${sampleNumber}.jpg`);
+  const image = await import(`@assets/images/sample${sampleNumber}.png`);
   const json = await import(`@assets/dataset/sample${sampleNumber}.json`) as never;
   return { image, json };
 }

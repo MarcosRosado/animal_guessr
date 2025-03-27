@@ -11,6 +11,7 @@ interface GridLoaderProps {
   image: StaticImport;
   showGrid?: boolean;
   startTimerCallback: () => void;
+  canSetMarker: boolean;
 }
 
 interface GridLoaderRef {
@@ -60,7 +61,7 @@ const GridLoader = forwardRef<GridLoaderRef, GridLoaderProps>((props, ref) => {
 
   const handleGridClick = (row: number, col: number) => {
     props.startTimerCallback();
-    if(props.showGrid)
+    if(props.showGrid || !props.canSetMarker)
       return;
     setMarker({ x: col, y: row });
     const distance = gridData.weightsGrid[row][col];
@@ -104,7 +105,7 @@ const GridLoader = forwardRef<GridLoaderRef, GridLoaderProps>((props, ref) => {
             row.map((cell, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
-                className={`border-transparent${cell === 1 && props.showGrid ? "border bg-green-500/50 bg-opacity-20" : " bg-transparent"}`}
+                className={`border-transparent${cell === 1 && props.showGrid ? "border bg-red-500/50 bg-opacity-20" : " bg-transparent"}`}
                 style={{width: cellWidth, height: cellHeight}}
                 onClick={() => handleGridClick(rowIndex, colIndex)}
               />

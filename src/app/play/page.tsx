@@ -196,7 +196,10 @@ const MainPage = () => {
       <div className="flex flex-col items-center justify-center p-4 w-4/5 mx-auto">
         {/* Mobile Layout */}
         <div className="block md:hidden w-full flex flex-col items-center">
-          <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
+          <div className="w-full bg-gray-200 rounded-full h-4 mb-4 relative">
+            <p className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full text-white">
+              {timeLeft} segundo(s) faltando
+            </p>
             <div
               className={clsx('h-4 rounded-full', {
                 'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
@@ -233,7 +236,10 @@ const MainPage = () => {
 
         {/* Desktop Layout */}
         <div className="hidden md:flex md:flex-col md:items-center w-full">
-          <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4">
+          <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4 relative">
+            <p className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full text-white">
+              {timeLeft} segundos faltando
+            </p>
             <div
               className={clsx('h-4 rounded-full', {
                 'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
@@ -248,13 +254,13 @@ const MainPage = () => {
               Continuar
             </Button>
           ) : (
-            <Button onClick={() =>handleConfirm()} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
+            <Button onClick={() => handleConfirm()} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
               Confirmar
             </Button>
           )}
           <div className="flex flex-row flex-wrap justify-center">
             <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-              <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
+            <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
               <p className="text-2xl text-green-500">{Math.ceil(currentScore as number)}</p>
             </div>
             <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">

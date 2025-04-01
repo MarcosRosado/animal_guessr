@@ -16,6 +16,7 @@ import {type ClassValue, clsx} from "clsx"
 import {twMerge} from "tailwind-merge"
 import {StaticImport} from "next/dist/shared/lib/get-img-props";
 import {useEffect, useState} from "react";
+import Cookies from 'js-cookie';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -57,6 +58,17 @@ export function usePageLoaded () {
   }, []);
 
   return isPageLoaded;
+}
+
+export function setCookieIfNotExists(cookieName: string, cookieValue: string, maxAge: number) {
+
+  if (!Cookies.get(cookieName)) {
+    Cookies.set(cookieName, cookieValue, { expires: maxAge * (24 * 60 * 60) }); // maxAge is in seconds, convert to days
+  }
+}
+
+export function getCookie(cookieName: string) {
+  return Cookies.get(cookieName);
 }
 
 

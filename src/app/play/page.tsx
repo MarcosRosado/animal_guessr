@@ -15,7 +15,7 @@
 "use client";
 
 import { GridLoader } from "@components/GridLoader";
-import {loadAllAssets, usePageLoaded} from "@lib/utils";
+import {getCookie, loadAllAssets, usePageLoaded} from "@lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Button } from "@components/button";
@@ -152,6 +152,7 @@ const MainPage = () => {
         timeSpentOnImage: timeSpentOnEachImage[index],
         finishTimestamp: finishTimestampOnEachImage[index],
       })),
+      sessionId: getCookie("gameId").toString(),
       totalScore: currentScores.reduce((acc, score) => Math.ceil(acc + score), 0),
     };
 

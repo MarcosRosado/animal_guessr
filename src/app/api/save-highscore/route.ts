@@ -25,24 +25,26 @@ interface HighscoreData {
   totalTime: number;
   scores: Score[];
   totalScore: number;
+  sessionId: string;
 }
 
 export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, totalTime, scores, totalScore }: HighscoreData = body;
+    const { name, totalTime, scores, totalScore, sessionId }: HighscoreData = body;
 
     // Basic validation
-    if (!name || !totalTime || !Array.isArray(scores) || !totalScore) {
+    if (!name || !totalTime || !Array.isArray(scores) || !totalScore || !sessionId) {
       return new Response("Invalid data format", { status: 400 });
     }
 
     const docRef = await addDoc(collection(firestore, "highscores"), {
-      name,
-      totalTime,
-      scores,
-      totalScore,
+      name:name,
+      totalTime:totalTime,
+      scores:scores,
+      totalScore:totalScore,
+      sessionId:sessionId,
       timestamp: serverTimestamp(),
     });
 

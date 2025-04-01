@@ -16,11 +16,16 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@components/button';
+import { v4 as uuidv4 } from 'uuid';
+import {setCookieIfNotExists} from "@lib/utils";
+
 
 const Dashboard = () => {
   const router = useRouter();
 
-  const handleStartGame = () => {
+  const handleStartGame = async () => {
+    setCookieIfNotExists('gameId', uuidv4(), 30);
+
     router.push('/play');
   };
 

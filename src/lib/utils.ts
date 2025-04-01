@@ -68,7 +68,7 @@ export function setCookieIfNotExists(cookieName: string, cookieValue: string, ma
 }
 
 export function getCookie(cookieName: string) {
-  return Cookies.get(cookieName);
+  return Cookies.get(cookieName) || "";
 }
 
 

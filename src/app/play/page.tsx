@@ -169,7 +169,7 @@ const MainPage = () => {
     }
   }, [currentIndex]);
 
-  if (currentIndex >= assets.length) {
+  if (currentIndex >= assets.length && assets.length > 0) {
     return (
       <>
         <Results

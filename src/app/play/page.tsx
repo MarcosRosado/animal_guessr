@@ -38,14 +38,17 @@ const MainPage = () => {
   const [timeLeft, setTimeLeft] = useState(START_TIME); // 1 minute by default
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   const [canSetMarker, setCanSetMarker] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const isPageLoaded = usePageLoaded();
   const router = useRouter();
 
 
   useEffect(() => {
     const fetchAssets = async () => {
-      const loadedAssets = await loadAllAssets(NUM_SAMPLES); // Load 10 samples
+      setIsLoading(true);
+      const loadedAssets = await loadAllAssets(NUM_SAMPLES); // Load assets
       setAssets(loadedAssets);
+      setIsLoading(false);
     };
     fetchAssets();
   }, []);
@@ -182,6 +185,14 @@ const MainPage = () => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-white text-xl">Preparando seu jogo...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-black">
       <div className="flex flex-col items-center justify-center w-full h-full mb-8">
@@ -189,8 +200,8 @@ const MainPage = () => {
           canSetMarker={canSetMarker}
           ref={gridLoaderRef}
           key={currentIndex}
-          gridData={assets[currentIndex].json}
-          image={assets[currentIndex].image}
+          gridData={assets[currentIndex]?.json}
+          image={assets[currentIndex]?.image}
           showGrid={showGrid}
         />
       </div>

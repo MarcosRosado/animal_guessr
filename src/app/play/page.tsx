@@ -14,14 +14,15 @@
 
 "use client";
 
-import { GridLoader } from "@components/GridLoader";
 import {getCookie, loadAllAssets, usePageLoaded} from "@lib/utils";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Button } from "@components/button";
 import Results from "@components/Results";
 import {clsx} from "clsx";
 import {useRouter} from "next/navigation";
+import {GridLoader} from "@components/GridLoader";
+import useGridLoader from "@components/hooks/gridHood";
 
 const START_TIME = 10;
 const NUM_SAMPLES = 10;
@@ -34,7 +35,7 @@ const MainPage = () => {
   const [finishTimestampOnEachImage, setFinishTimestampOnEachImage] = useState<number[]>([]);
   const [showGrid, setShowGrid] = useState(false);
   const [currentScore, setCurrentScore] = useState<number | null>(null);
-  const gridLoaderRef = useRef<{ getScore: () => number | null }>(null);
+  const { mobileGridRef, desktopGridRef, getActiveRef } = useGridLoader();
   const [timeLeft, setTimeLeft] = useState(START_TIME); // 1 minute by default
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   const [canSetMarker, setCanSetMarker] = useState(true);
@@ -66,8 +67,10 @@ const MainPage = () => {
   }, [isPageLoaded]);
 
   const handleConfirm = (skipCoreVerification?: boolean) => {
-    if (gridLoaderRef.current) {
-      let score = gridLoaderRef.current.getScore();
+    const activeRef = getActiveRef();
+
+    if (activeRef.current) {
+      let score = activeRef.current.getScore();
       if(skipCoreVerification === true) score = 0;
       const willSkip = skipCoreVerification || score !== null;
       if (score !== null && willSkip) {
@@ -194,99 +197,123 @@ const MainPage = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
-      <div className="flex flex-col items-center justify-center w-full h-full mb-8">
-        <GridLoader
-          canSetMarker={canSetMarker}
-          ref={gridLoaderRef}
-          key={currentIndex}
-          gridData={assets[currentIndex]?.json}
-          image={assets[currentIndex]?.image}
-          showGrid={showGrid}
-        />
-      </div>
-      <div className="flex flex-col items-center justify-center p-4 w-4/5 mx-auto">
+      <div className="flex flex-col min-h-screen bg-black">
         {/* Mobile Layout */}
-        <div className="block md:hidden w-full flex flex-col items-center">
-          <div className="w-full bg-gray-200 rounded-full h-4 mb-4 relative">
-            <p className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full text-white">
-              {timeLeft} segundo(s) faltando
-            </p>
-            <div
-              className={clsx('h-4 rounded-full', {
-                'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
-                'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
-                'bg-red-500': timeLeft <= START_TIME / 3,
-              })}
-              style={{width: `${(timeLeft / START_TIME) * 100}%`}}
-            ></div>
-          </div>
-          {currentScore !== null ? (
-            <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
-              Continuar
-            </Button>
-          ) : (
-            <Button onClick={() => handleConfirm()} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
-              Confirmar
-            </Button>
-          )}
-          {currentScore !== null && (
-            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-              <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
-              <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
-            </div>
-          )}
-          <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-            <h2 className="text-xl font-bold mb-2">Imagem</h2>
-            <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-            <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
-            <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
-          </div>
+        <div className="flex md:hidden flex-col items-center justify-center w-full h-full mb-8">
+          <GridLoader
+              ref={mobileGridRef}
+              canSetMarker={canSetMarker}
+              key={currentIndex}
+              gridData={assets[currentIndex]?.json}
+              image={assets[currentIndex]?.image}
+              showGrid={showGrid}
+          />
         </div>
 
-        {/* Desktop Layout */}
-        <div className="hidden md:flex md:flex-col md:items-center w-full">
-          <div className="w-3/5 bg-gray-200 rounded-full h-4 mb-4 relative">
-            <p className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full text-white">
-              {timeLeft} segundos faltando
-            </p>
-            <div
-              className={clsx('h-4 rounded-full', {
-                'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
-                'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
-                'bg-red-500': timeLeft <= START_TIME / 3,
-              })}
-              style={{width: `${(timeLeft / START_TIME) * 100}%`}}
-            ></div>
-          </div>
-          {currentScore !== null ? (
-            <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 rounded">
-              Continuar
-            </Button>
-          ) : (
-            <Button onClick={() => handleConfirm()} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
-              Confirmar
-            </Button>
-          )}
-          <div className="flex flex-row flex-wrap justify-center">
-            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
-            <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
-              <p className="text-2xl text-green-500">{Math.ceil(currentScore as number)}</p>
-            </div>
-            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+        {/* Desktop Layout - New Layout with side cards */}
+        <div className="hidden md:flex w-full p-4 flex-1">
+          {/* Left side cards */}
+          <div className="w-1/4 flex flex-col items-center justify-center">
+            <div className="bg-white shadow-md rounded-lg p-4 m-2 w-40 text-center">
               <h2 className="text-xl font-bold mb-2">Imagem</h2>
               <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
             </div>
-            <div className="bg-white shadow-md rounded-lg p-6 m-4 w-80 text-center">
+            <div className="bg-white shadow-md rounded-lg p-4 m-2 w-40 text-center">
               <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
               <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
             </div>
           </div>
+
+          {/* Center - GridLoader */}
+          <div className="w-5/6 flex flex-col items-center justify-center">
+            <GridLoader
+                ref={desktopGridRef}
+                canSetMarker={canSetMarker}
+                key={`desktop-${currentIndex}`}
+                gridData={assets[currentIndex]?.json}
+                image={assets[currentIndex]?.image}
+                showGrid={showGrid}
+            />
+            <div className="w-full bg-gray-200 rounded-full h-4 mb-4 mt-10 relative">
+              <p className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full text-white">
+                {timeLeft} segundos faltando
+              </p>
+              <div
+                  className={clsx('h-4 rounded-full', {
+                    'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
+                    'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
+                    'bg-red-500': timeLeft <= START_TIME / 3,
+                  })}
+                  style={{width: `${(timeLeft / START_TIME) * 100}%`}}
+              ></div>
+            </div>
+          </div>
+
+          {/* Right side - Score card and button */}
+          <div className="w-1/4 flex flex-col items-center justify-center">
+            <div className="bg-white shadow-md rounded-lg p-4 m-2 w-40 text-center">
+              <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
+              <p className="text-2xl text-green-500">{currentScore !== null ? Math.ceil(currentScore) : "-"}</p>
+            </div>
+
+            <div className="mt-4">
+              {currentScore !== null ? (
+                  <Button onClick={handleContinue} className="bg-green-500 text-white px-6 py-3 rounded w-full">
+                    Continuar
+                  </Button>
+              ) : (
+                  <Button onClick={() => handleConfirm()} className="bg-blue-500 text-white px-6 py-3 rounded w-full">
+                    Confirmar
+                  </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Layout content */}
+        <div className="md:hidden flex flex-col items-center justify-center p-4 w-4/5 mx-auto">
+          <div className="w-full flex flex-col items-center">
+            <div className="w-full bg-gray-200 rounded-full h-4 mb-4 relative">
+              <p className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full text-white whitespace-nowrap">
+                {timeLeft} segundo(s) faltando
+              </p>
+              <div
+                  className={clsx('h-4 rounded-full', {
+                    'bg-green-500': timeLeft > START_TIME - START_TIME / 3,
+                    'bg-yellow-500': timeLeft <= START_TIME - START_TIME / 3 && timeLeft > START_TIME / 3,
+                    'bg-red-500': timeLeft <= START_TIME / 3,
+                  })}
+                  style={{width: `${(timeLeft / START_TIME) * 100}%`}}
+              ></div>
+            </div>
+            {currentScore !== null ? (
+                <Button onClick={handleContinue} className="bg-green-500 text-white px-4 py-2 w-full rounded">
+                  Continuar
+                </Button>
+            ) : (
+                <Button onClick={() => handleConfirm()} className="bg-blue-500 text-white px-4 py-2 w-full rounded">
+                  Confirmar
+                </Button>
+            )}
+            <div className="flex flex-wrap justify-center">
+              {currentScore !== null && (
+                  <div className="bg-white shadow-md rounded-lg p-6 m-2 w-[calc(50%-1rem)] text-center">
+                    <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
+                    <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
+                  </div>
+              )}
+              <div className="bg-white shadow-md rounded-lg p-6 m-2 w-[calc(50%-1rem)] text-center">
+                <h2 className="text-xl font-bold mb-2">Imagem</h2>
+                <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
+              </div>
+              <div className="bg-white shadow-md rounded-lg p-6 m-2 w-[calc(50%-1rem)] text-center">
+                <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
+                <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 

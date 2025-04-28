@@ -62,7 +62,9 @@ const MainPage = () => {
 
   useEffect(() => {
     if (isPageLoaded) {
-      startTimer();
+      setTimeout(() => {
+        startTimer();
+      }, 1000);
     }
   }, [isPageLoaded]);
 
@@ -236,7 +238,7 @@ const MainPage = () => {
             />
             <div className="w-full bg-gray-200 rounded-full h-4 mb-4 mt-10 relative">
               <p className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full text-white">
-                {timeLeft} segundos faltando
+                {timeLeft} segundo(s) faltando
               </p>
               <div
                   className={clsx('h-4 rounded-full', {
@@ -295,18 +297,18 @@ const MainPage = () => {
                   Confirmar
                 </Button>
             )}
-            <div className="flex flex-wrap justify-center">
+            <div className="wrap justify-center">
               {currentScore !== null && (
-                  <div className="bg-white shadow-md rounded-lg p-6 m-2 w-[calc(50%-1rem)] text-center">
+                  <div className="bg-white shadow-md rounded-lg p-6 m-2 w-40 text-center">
                     <h2 className="text-xl font-bold mb-2">Pontuação Atual</h2>
                     <p className="text-2xl text-green-500">{Math.ceil(currentScore)}</p>
                   </div>
               )}
-              <div className="bg-white shadow-md rounded-lg p-6 m-2 w-[calc(50%-1rem)] text-center">
+              <div className="bg-white shadow-md rounded-lg p-6 m-2 w-40 text-center">
                 <h2 className="text-xl font-bold mb-2">Imagem</h2>
                 <p className="text-lg">{currentIndex + 1} de {assets.length}</p>
               </div>
-              <div className="bg-white shadow-md rounded-lg p-6 m-2 w-[calc(50%-1rem)] text-center">
+              <div className="bg-white shadow-md rounded-lg p-6 m-2 w-40 text-center">
                 <h2 className="text-xl font-bold mb-2">Pontuação Total</h2>
                 <p className="text-2xl text-blue-500">{scores.reduce((acc, score) => Math.ceil(acc + score), 0)}</p>
               </div>

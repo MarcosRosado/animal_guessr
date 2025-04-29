@@ -24,7 +24,7 @@ import {useRouter} from "next/navigation";
 import {GridLoader} from "@components/GridLoader";
 import useGridLoader from "@components/hooks/gridHood";
 
-const START_TIME = 10;
+const START_TIME = 20;
 const NUM_SAMPLES = 10;
 
 const MainPage = () => {

@@ -30,15 +30,25 @@ const Dashboard = () => {
           <li>Sua tarefa é identificar o animal na foto, clicando onde você acredita que ele esteja.</li>
           <li>Você tem um limite de 20 segundos para completar cada imagem.</li>
           <li>Uma pontuação será atribuída dependendo da proximidade do animal, variando de 0 a 1000.</li>
+          <li>Por favor, jogar apenas uma vez.</li>
           <li>Encontre os animais, e tente conquistar a maior pontuação possível!</li>
+        </ul>
+        <ul className="list-disc list-inside text-left mb-4">
+          <b>Informações:</b>
+          <br/>
+          Este jogo é parte do projeto de doutorado intitulado “Ecologia e Evolução do Sono em Serpentes”,
+          desenvolvido pelo Me. Gabriel Spanghero (Programa de Pós-graduação em Ecologia da UNICAMP),
+          sob orientação da Profa. Thaís Guedes (UNESP – Campus Rio Claro) e Dr. Paul Antoine Libourel (CRNS –
+          Montpellier).
+          Financiamento: FAPESP (Nº 2022/14451-3). Objetivo do jogo: avaliar quanto tempo as pessoas demoram para
+          identificar as serpentes camufladas.
         </ul>
         <div className="text-left mb-4">
           <p className="text-lg mb-2">
             <b>Termos de uso:</b>
-            <br/>
-            Este jogo pretende avaliar quanto tempo as pessoas demoram para identificar as serpentes camufladas.
             <br />
-            Para que possamos utilizar as informações coletadas dos jogadores para finalidades científicas, por favor marque as caixas de seleção:
+            Para que possamos utilizar as informações coletadas dos jogadores para finalidades científicas, por favor
+            marque as caixas de seleção:
           </p>
           <div className="flex items-center mb-2">
             <input

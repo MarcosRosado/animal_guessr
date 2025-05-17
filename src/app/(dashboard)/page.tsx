@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
 import { Button } from "@components/button";
 import { v4 as uuidv4 } from "uuid";
@@ -10,13 +10,23 @@ const Dashboard = () => {
   const router = useRouter();
   const [isOver15, setIsOver15] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const handleStartGame = async () => {
     setCookieIfNotExists("gameId", uuidv4(), 30);
     router.push("/play");
   };
 
-  const isButtonDisabled = !(isOver15 && consentGiven);
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(/Mobi|Android/i.test(navigator.userAgent));
+    };
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, []);
+
+  const isButtonDisabled = !(isOver15 && consentGiven) || isMobile;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
@@ -42,6 +52,8 @@ const Dashboard = () => {
           Montpellier).
           Financiamento: FAPESP (Nº 2022/14451-3). Objetivo do jogo: avaliar quanto tempo as pessoas demoram para
           identificar as serpentes camufladas.
+          <br />
+          <i>Durante o experimento, será possível jogar apenas pelo navegador do computador, e não pelo celular.</i>
         </ul>
         <div className="text-left mb-4">
           <p className="text-lg mb-2">

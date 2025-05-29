@@ -50,7 +50,7 @@ const Dashboard = () => {
           desenvolvido pelo Me. Gabriel Spanghero (Programa de Pós-graduação em Ecologia da UNICAMP),
           sob orientação da Profa. Thaís Guedes (UNESP – Campus Rio Claro) e Dr. Paul Antoine Libourel (CRNS –
           Montpellier).
-          Financiamento: FAPESP (Nº 2022/14451-3). Objetivo do jogo: avaliar quanto tempo as pessoas demoram para
+          Financiamento: FAPESP (Nº 2022/14451-3), FAPESP (2021/07161-6). Objetivo do jogo: avaliar quanto tempo as pessoas demoram para
           identificar as serpentes camufladas.
           <br />
           <i>Durante o experimento, será possível jogar apenas pelo navegador do computador, e não pelo celular.</i>

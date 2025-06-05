@@ -24,6 +24,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export function calculateScore (distance: number, maxDistance: number): number {
   if (distance === 0) return 1000;
+  // realiza uma interpolação linear para calcular a pontuação,
+  // onde 0 distância resulta em 1000 pontos e maxDistance resulta em 0 pontos
   return Math.max(0, 1000 - (distance / maxDistance) * 1000);
 }
 

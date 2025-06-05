@@ -40,6 +40,7 @@ const MainPage = () => {
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   const [canSetMarker, setCanSetMarker] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const isPageLoaded = usePageLoaded();
   const router = useRouter();
 
@@ -61,29 +62,25 @@ const MainPage = () => {
   }, [timeLeft]);
 
   useEffect(() => {
-    if (isPageLoaded) {
-      setTimeout(() => {
-        startTimer();
-      }, 1000);
+    if (isPageLoaded && !isLoading && assets.length > 0 && isImageLoaded) {
+        resetTimer();
     }
-  }, [isPageLoaded]);
+  }, [isPageLoaded, isLoading, assets, isImageLoaded]);
 
-  const handleConfirm = (skipCoreVerification?: boolean) => {
+  const handleConfirm = (skipScoreVerification?: boolean) => {
     const activeRef = getActiveRef();
+    const ref = activeRef.current;
+    if (!ref) return;
 
-    if (activeRef.current) {
-      let score = activeRef.current.getScore();
-      if(skipCoreVerification === true) score = 0;
-      const willSkip = skipCoreVerification || score !== null;
-      if (score !== null && willSkip) {
-        setScores([...scores, score]);
-        setTimeSpentOnEachImage([...timeSpentOnEachImage, START_TIME - timeLeft]);
-        setFinishTimestampOnEachImage([...finishTimestampOnEachImage, Date.now()]);
-        setCurrentScore(score);
-        setShowGrid(true);
-        stopTimer();
-      }
-    }
+    const score = skipScoreVerification ? 0 : ref.getScore();
+    if (score === null && !skipScoreVerification) return;
+
+    setScores(prev => [...prev, score as number]);
+    setTimeSpentOnEachImage(prev => [...prev, START_TIME - timeLeft]);
+    setFinishTimestampOnEachImage(prev => [...prev, Date.now()]);
+    setCurrentScore(score);
+    setShowGrid(true);
+    stopTimer();
   };
 
   const handleContinue = () => {
@@ -91,7 +88,7 @@ const MainPage = () => {
     setShowGrid(false);
     setCurrentScore(null);
     setCurrentIndex(currentIndex + 1);
-    resetTimer();
+    setIsImageLoaded(false)
     if(currentIndex >= assets.length) {
       stopTimer();
     }
@@ -100,12 +97,12 @@ const MainPage = () => {
   const resetGame = () => {
     setScores([]);
     setCurrentIndex(0);
+    setIsImageLoaded(false)
     setShowGrid(false);
     setCurrentScore(null);
     setTimeSpentOnEachImage([]);
     setFinishTimestampOnEachImage([]);
     resetTimer();
-    startTimer();
   };
 
   const handleMainMenu = () => {
@@ -234,6 +231,7 @@ const MainPage = () => {
                 key={`desktop-${currentIndex}`}
                 gridData={assets[currentIndex]?.json}
                 image={assets[currentIndex]?.image}
+                onImageLoad={() => setIsImageLoaded(true)}
                 showGrid={showGrid}
             />
             <div className="w-full bg-gray-200 rounded-full h-4 mb-4 mt-10 relative">

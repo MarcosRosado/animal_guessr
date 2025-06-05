@@ -24,6 +24,7 @@ interface GridLoaderProps {
   image: StaticImport;
   showGrid?: boolean;
   canSetMarker: boolean;
+  onImageLoad?: () => void;
 }
 
 interface GridLoaderRef {
@@ -75,9 +76,6 @@ const GridLoader = forwardRef<GridLoaderRef, GridLoaderProps>((props, ref) => {
     if(props.showGrid || !props.canSetMarker)
       return;
     setMarker({ x: col, y: row });
-    const distance = gridData.weightsGrid[row][col];
-    const score = calculateScore(distance, gridData.maxDistance);
-    console.log(`Clicked on row: ${row}, col: ${col}, Distance: ${distance}, Score: ${score}`);
   };
 
   const cellWidth = imageSize.width / COLUMNS;
@@ -101,6 +99,7 @@ const GridLoader = forwardRef<GridLoaderRef, GridLoaderProps>((props, ref) => {
           src={props.image}
           alt="Sample"
           layout="responsive"
+          onLoad={props.onImageLoad}
           width={1920}
           height={1080}
         />
